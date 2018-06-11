@@ -1,84 +1,96 @@
-/*var http=require('http');
-var mclient=require('mongodb').MongoClient;
-var url="mongodb://localhost:27017/";
-var binary=require('mongodb').Binary;
-var fs=require('fs');
-var q;
-http.createServer(function(req,res){
-	fs.readFile('abc.txt', function(err, data) {
-    res.writeHead(200, {'Content-Type': 'text'});
-	q=data;
-    res.write(data);
-    res.end('HERE');
+const express=require('express');
+const app=express();
+const router=express.Router();
+const db=require('./db1');
+var MongoClient = require('mongodb').MongoClient;
+const fs=require('fs');
+const busboy=require('connect-busboy');
+const path = require('path');
+const Busboy=require('busboy');
+const obj1=[
+{"id":0,"Title":"Accountant","Description":"Analyze financial information","Location":"Bangalore","Skills":"Mathematics,Active Listening,Monitoring,Critical Thinking","fullDes":"hi"},
+{"id":1,"Title":"Advertising Manager","Description":"Plans and executes advertising policies of organization","Location":"Mumbai","Skills":"Good Organisation,Time Management,Communication etc","fullDes":"bi"},
+{"id":2,"Title":"Singer","Description":"Holds felt hats over flame","Location":"Bombay","Skills":"Prior Experince in the field","fullDes":"goTo"}
+];
+
+router.use(busboy());
+router.get('/addjob',  function (req, response) {	
+	let collection=db.get().collection('jobs')
+	collection.insertMany(obj1,(err,res)=>{
+			if(err) throw err;
+			response.send('values inserted');
+			console.log("values inserted");
+		});
+});  
+
+router.get('/joblist',function(req,response){
+	
+	let collection=db.get().collection('jobs');
+	collection.find().toArray(function(err,result){
+		if(err) throw err;
+		response.send({express:result});
 	});
-}).listen(8080);
+});
 
-var indata={};
-indata.filedata=binary(q);
-*/
-var express=require('express');
-var router=express.Router();
-var db=require('./db1');
-var query={};//specify the particular query
-var coll='';//specify the particular collection
-var obj1=[{jid:"1", title:"trainee",desc:"budding engineers",locatn:"bangalore"},
-			{jid: "2", title:"software developer",desc:"budding engineers", loctn:"bangalore"},
-			{jid: "3", title:"game designer",desc:"budding engineers", loctn:"bangalore"},
-			{jid: "4", title:"marketeer",desc:"budding engineers" ,loctn:"bangalore"}
-			];
-var obj2=[{cv:"cv1"},{cv:"cv2"}];
+router.post('/upload', (req, res) => {
+	console.log("In upload");
+  var busboy = new Busboy({ headers: req.headers });
+    busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+      //var saveTo = path.join(os.tmpDir(), path.basename(fieldname));
+	  var saveTo =path.join(process.cwd(), 'my1.pdf')
+      file.pipe(fs.createWriteStream(saveTo));
+    });
+	return req.pipe(busboy);
+    });
+    /*busboy.on('finish', function() {
+      //res.writeHead(200, { 'Connection': 'close' });
+      
+    });
+    	*/
+router.post('/upload1', function (req, res) {
+    res.send('<html><head></head><body>\
+               <form method="POST" enctype="multipart/form-data">\
+                <input type="text" name="textfield"><br />\
+                <input type="file" name="filefield"><br />\
+                <input type="submit">\
+              </form>\
+            </body></html>');
+  res.end();
+});
 
-	  router.get('/addjob',  function (req, response) {	
-		var collection=db.get().collection('jobs')
-		collection.insertMany(obj1,function(err,res){
-				if(err) throw err;
-				response.send('values inserted');
-				console.log("values inserted");
-				
-			});
-		
-	  });  
-	
-	router.get('/findque', function(req,response) {
-		var collection=db.get().collection(coll)
-		collection.find(query).toArray(function(err,result){
-			if(err) throw err;
-			response.send(result);
-			
-		});
-	});
-		
 
-	
-	router.get('/addcv',function(req,response){
-		var collection=db.get().collection('resumes')
-		collection.insertMany(obj2,function(err,result){
-			if(err) throw err;
-			response.send('inserted in resumes');
-			console.log(result);
+// accept POST request on the homepage
+
+  
+  /*let imageFile = req.files.file;
+
+  imageFile.mv(`${__dirname}/public/${req.body.filename}.pdf`, function(err) {
+    if (err) {
+      return res.status(500).send(err);
+	  console.log("ERROR IN UPLOAD");
+    }
+
+    res.json({file: 'uploaded file'});
+  
+
+
+router.post('/upload', upload.single(), function (req, response) {
+	let collection=db.get().collection('resumes');
+	console.log(req.file);
+	let func1 = (count)=> {
 		
-		});
-	});	
-	
-	
-	router.get('/joblist',function(req,response){
-		var collection=db.get().collection('jobs');
-		collection.find().toArray(function(err,result){
+		collection.insertOne({id:count,name:req.body.name,email:req.body.email,skills:req.body.skills},(err,res)=>{
 			if(err) throw err;
-			response.send(result);
-			console.log(result);
-		
+			response.send('values inserted');
+			console.log("values inserted");
 		});
-	  });
-	
-	module.exports=router;
-/*
-MongoClient.connect(url, function(err, db) {
-  if (err) throw err;
-  var dbo = db.db("abc");
-  dbo.collection("jobs").find({}).toArray(obj1,function(err,result){
-	  if(err) throw err;
-	  console.log(result);
-	  db.close();
-  });
-});*/
+	}
+	collection.count({}, function(error, numOfDocs){
+		if(error) return callback(error);
+		let count=0;
+		count=numOfDocs;
+		func1(count);
+	})*/
+
+
+module.exports=router;
