@@ -47,16 +47,7 @@ router.post('/upload', (req, res) => {
       
     });
     	*/
-router.post('/upload1', function (req, res) {
-    res.send('<html><head></head><body>\
-               <form method="POST" enctype="multipart/form-data">\
-                <input type="text" name="textfield"><br />\
-                <input type="file" name="filefield"><br />\
-                <input type="submit">\
-              </form>\
-            </body></html>');
-  res.end();
-});
+
 
 
 // accept POST request on the homepage
